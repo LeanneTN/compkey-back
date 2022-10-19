@@ -2,7 +2,7 @@ package com.example.compkeyback.controller;
 
 import com.example.compkeyback.domain.Message;
 import com.example.compkeyback.service.MessageService;
-import com.sun.istack.internal.NotNull;
+import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("/send")
-    public List<Message> sendMessage(@RequestParam @NotNull String statement){
+    public List<Message> sendMessage(@RequestParam @NotNull(message = "statement can't be null") String statement){
         Message message = new Message();
         message.setKey("a");
         message.setValue("b");
