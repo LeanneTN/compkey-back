@@ -18,7 +18,9 @@ public class MessageController {
 
     @PostMapping("/send")
     public Message sendMessage(@RequestParam @NotNull String statement){
-
-        return null;
+        Message message = new Message();
+        message.setKey("a");
+        message.setValue("b");
+        return message;
     }
 }
