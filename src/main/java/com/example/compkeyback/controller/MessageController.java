@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/message")
 public class MessageController {
@@ -17,10 +20,12 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("/send")
-    public Message sendMessage(@RequestParam @NotNull String statement){
+    public List<Message> sendMessage(@RequestParam @NotNull String statement){
         Message message = new Message();
         message.setKey("a");
         message.setValue("b");
-        return message;
+        List<Message> messages = new ArrayList<>();
+        messages.add(message);
+        return messages;
     }
 }
