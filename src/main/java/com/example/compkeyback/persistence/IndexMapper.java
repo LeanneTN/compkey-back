@@ -1,4 +1,7 @@
 package com.example.compkeyback.persistence;
 
-public class IndexMapper {
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.compkeyback.domain.Index;
+
+public interface IndexMapper extends BaseMapper<Index> {
 }

@@ -1,4 +1,7 @@
 package com.example.compkeyback.service;
 
-public class MessageService {
+import java.math.BigDecimal;
+
+public interface MessageService {
+    public int insertIndex(String Keyword);
 }
