@@ -21,11 +21,11 @@ public class MessageController {
 
     @PostMapping("/send")
     public List<Message> sendMessage(@RequestParam @NotNull(message = "statement can't be null") String statement){
-        Message message = new Message();
-        message.setKey("a");
-        message.setValue("b");
+        // 传入搜索语句statement，输出含有竞争关键词和竞争度的Message list
+
+
         List<Message> messages = new ArrayList<>();
-        messages.add(message);
+
         return messages;
     }
 }
