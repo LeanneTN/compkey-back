@@ -1,13 +1,18 @@
 package com.example.compkeyback.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 @TableName("keymap")
+@Data
 public class Index {
     private String word;
     private String fileNum;
     private Integer time;
     private Integer location;
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     public Integer getId() {
