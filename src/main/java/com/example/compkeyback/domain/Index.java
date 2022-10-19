@@ -1,6 +1,7 @@
 package com.example.compkeyback.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -8,10 +9,14 @@ import lombok.Data;
 @TableName("keymap")
 @Data
 public class Index {
+    @TableField("word")
     private String word;
+    @TableField("fileNum")
     private String fileNum;
-    private Integer time;
-    private Integer location;
+    @TableField("time")
+    private String time;
+    @TableField("location")
+    private String location;
     @TableId(type = IdType.AUTO)
     private Integer id;
 
@@ -39,19 +44,19 @@ public class Index {
         this.fileNum = fileNum;
     }
 
-    public Integer getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Integer time) {
+    public void setTime(String time) {
         this.time = time;
     }
 
-    public Integer getLocation() {
+    public String getLocation() {
         return location;
     }
 
-    public void setLocation(Integer location) {
+    public void setLocation(String location) {
         this.location = location;
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,5 +28,9 @@ public class MessageController {
         List<Message> messages = new ArrayList<>();
 
         return messages;
+    }
+
+    public void insertRecord() throws IOException {
+        messageService.insertSearchRecord();
     }
 }

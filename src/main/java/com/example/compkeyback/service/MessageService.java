@@ -1,7 +1,8 @@
 package com.example.compkeyback.service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 public interface MessageService {
-    public int insertIndex(String Keyword);
+    public void insertSearchRecord() throws IOException;
 }
