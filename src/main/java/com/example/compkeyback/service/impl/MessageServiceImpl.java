@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -39,36 +40,37 @@ public class MessageServiceImpl implements MessageService {
         while(k==0) {
             Index index = new Index();
             while ((valueString = br.readLine()) != null){
+//                if(valueString.contains("}")) {
+//                    length = valueString.length();
+//                    flag = valueString.indexOf("}");
+//                    str4 += valueString.substring(0,flag-1);
+//                    index.setLocation(str4);
+//                    //System.out.println("str4"+str4);
+//                    break;
+//                }
                 if(valueString.contains("}")) {
+                    flag = valueString.indexOf("\t");
+                    temp = valueString.substring(0,flag);
                     length = valueString.length();
-                    flag = valueString.indexOf("}");
-                    str4 += valueString.substring(0,flag-1);
-                    index.setLocation(str4);
-                    //System.out.println("str4"+str4);
-                    break;
-                }
-                if(valueString.contains("   ")) {
-                    flag = valueString.indexOf("   ");
-                    temp = valueString.substring(0,flag-1);
-                    length = valueString.length();
-                    temp1 = valueString.substring(flag+1,length-1);
+                    temp1 = valueString.substring(flag+1,length);
                     flag = temp1.indexOf("=");
-                    str3 = temp1.substring(0,flag-1);
+                    str3 = temp1.substring(1,flag);
                     templength = temp1.length();
                     str4 = temp1.substring(flag+1,templength-1);
                     templength = temp.length();
                     flag = temp.indexOf("+");
-                    str1 = temp.substring(0,flag-1);
-                    str2 = temp.substring(flag+1,templength-1);
+                    str1 = temp.substring(0,flag);
+                    str2 = temp.substring(flag+1,templength);
+                    str1 = new String(str1.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
                     index.setWord(str1);
                     index.setFileNum(str2);
                     index.setTime(str3);
+                    index.setLocation(str4);
                     System.out.println("str1"+str1);
                     System.out.println("str2"+str2);
                     System.out.println("str3"+str3);
-                    continue;
+                    break;
                 }
-                str4 += valueString;
             }
             if(valueString == null) {
                 k=1;
