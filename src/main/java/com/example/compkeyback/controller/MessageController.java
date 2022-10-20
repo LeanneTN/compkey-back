@@ -30,7 +30,5 @@ public class MessageController {
         return messages;
     }
 
-    public void insertRecord() throws IOException {
-        messageService.insertSearchRecord();
-    }
+
 }

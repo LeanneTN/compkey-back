@@ -1,6 +1,7 @@
 package com.example.compkeyback;
 
 import com.example.compkeyback.domain.Index;
+import com.example.compkeyback.service.CompkeyService;
 import com.example.compkeyback.service.MessageService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,13 @@ class CompkeyBackApplicationTests {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private CompkeyService compkeyService;
+
     @Test
     void contextLoads() throws IOException {
 //        messageService.insertSearchRecord();
+        compkeyService.compkey("图片",3);
     }
 
 }
