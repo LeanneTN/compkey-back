@@ -70,6 +70,7 @@ public class Util {
         List<Map.Entry<String,Double>> entrys = new ArrayList<>(map.entrySet());
         //调用Collections.sort(list,comparator)方法把Entry-list排序
         Collections.sort(entrys, new MyComparator());
+        Collections.reverse(entrys);
         //遍历排序好的Entry-list,输出结果
         for(Map.Entry<String,Double> entry:entrys){
             System.out.println(entry.getKey()+" : "+entry.getValue());
