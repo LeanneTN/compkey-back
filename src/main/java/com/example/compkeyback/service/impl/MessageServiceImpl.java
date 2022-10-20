@@ -1,6 +1,7 @@
 package com.example.compkeyback.service.impl;
 
 import ch.qos.logback.core.db.dialect.DBUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.compkeyback.domain.Index;
 import com.example.compkeyback.persistence.IndexMapper;
 import com.example.compkeyback.service.MessageService;
@@ -13,6 +14,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("messageService")
 @Component
@@ -78,5 +81,15 @@ public class MessageServiceImpl implements MessageService {
             }
             indexMapper.insert(index);
         }
+    }
+
+    @Override
+    public List<Index> selectSearchRecord(String keyword) {
+        Index index = new Index();
+        QueryWrapper<Index> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("word", keyword);
+        List<Index> indexList = new ArrayList<>();
+        indexList = indexMapper.selectList(queryWrapper);
+        return indexList;
     }
 }
