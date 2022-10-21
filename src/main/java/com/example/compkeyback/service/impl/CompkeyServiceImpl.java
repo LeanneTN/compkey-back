@@ -2,6 +2,7 @@ package com.example.compkeyback.service.impl;
 
 import com.example.compkeyback.service.CompkeyService;
 import com.example.compkeyback.util.*;
+import org.ansj.splitWord.analysis.ToAnalysis;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -197,5 +198,10 @@ public class CompkeyServiceImpl implements CompkeyService {
         System.out.println("CompKey算法结束...");
 
         return Util.compMap(compKeyList,compResult);
+    }
+
+    @Override
+    public String getStringValue(String statement) {
+        return ToAnalysis.parse(statement).toString();
     }
 }
