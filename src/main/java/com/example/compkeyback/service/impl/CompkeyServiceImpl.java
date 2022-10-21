@@ -1,5 +1,6 @@
 package com.example.compkeyback.service.impl;
 
+import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.service.CompkeyService;
 import com.example.compkeyback.util.*;
 import org.ansj.splitWord.analysis.ToAnalysis;
@@ -18,7 +19,7 @@ import java.util.Scanner;
 @Component
 public class CompkeyServiceImpl implements CompkeyService {
     @Override
-    public List<Map.Entry<String, Double>> compkey(String seedKey, int minNum) throws IOException {
+    public CompkeyResult compkey(String seedKey, int minNum) throws IOException {
         System.out.println("查询种子关键词的相关搜索记录...");
         //从清洗过的数据中提取出与种子关键字相关的搜索信息并保存
         int infoCounter = Util.search(seedKey,"src/main/resources/compkeyFiles/seedSearchResult.txt");
@@ -27,9 +28,9 @@ public class CompkeyServiceImpl implements CompkeyService {
         System.out.println("开始查找中介关键词...");
         //分词
         //方法一:单线程
-        AnsjCutData.cut_clean("seedSearchResult.txt");
+        // AnsjCutData.cut_clean("seedSearchResult.txt");
         //方法二:多线程
-        //CutThread.divide("seedSearchResult.txt",infoCounter);
+        CutThread.divide("seedSearchResult.txt",infoCounter);
         //词频统计
         CountData.wordCount("cutted_seedSearchResult.txt",15);
         //确定中介关键词及相关搜索量
@@ -101,9 +102,9 @@ public class CompkeyServiceImpl implements CompkeyService {
             int infCounter = CompSearch.search(seedKey,midKey,String.format("src/main/resources/compkeyFiles/%sCompSearchResult.txt",midKey));
             //分词
             //单线程
-            AnsjCutData.cut_clean(String.format("%sCompSearchResult.txt",midKey));
+            // AnsjCutData.cut_clean(String.format("%sCompSearchResult.txt",midKey));
             //多线程
-            //CutThread.divide(String.format("%sCompSearchResult.txt",midKey),infCounter);
+            CutThread.divide(String.format("%sCompSearchResult.txt",midKey),infCounter);
             //词频统计
             CountData.wordCount(String.format("cutted_%sCompSearchResult.txt",midKey),10);
 
@@ -198,7 +199,11 @@ public class CompkeyServiceImpl implements CompkeyService {
 
         System.out.println("CompKey算法结束...");
 
-        return Util.compMap(compKeyList,compResult);
+        CompkeyResult compkey_result = new CompkeyResult();
+        compkey_result.setCompkeyList(compKeyList);
+        compkey_result.setCompkeyResult(compResult);
+
+        return compkey_result;
     }
 
     @Override

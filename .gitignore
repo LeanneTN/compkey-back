@@ -32,3 +32,5 @@ build/
 
 /src/main/resources/application.properties
 /src/main/resources/files/index.txt
+/src/main/resources/compkeyFiles/
+/src/main/resources/stopWords/

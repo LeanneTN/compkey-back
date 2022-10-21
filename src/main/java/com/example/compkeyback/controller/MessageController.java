@@ -1,6 +1,7 @@
 package com.example.compkeyback.controller;
 
 import com.example.compkeyback.domain.Message;
+import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.service.CompkeyService;
 import com.example.compkeyback.service.MessageService;
 import javax.validation.constraints.NotNull;
@@ -35,6 +36,17 @@ public class MessageController {
 
         List<Message> messages = new ArrayList<>();
 
+        for(String keyword : stringValue){
+            CompkeyResult tempList = compkeyService.compkey(keyword, 3);
+            List<String> compkey = tempList.getCompkeyList();
+            List<Double> compkeyResult = tempList.getCompkeyResult();
+            for(int i = 0; i < compkey.size(); i++){
+                Message message = new Message();
+                message.setKey(compkey.get(i));
+                message.setValue(compkeyResult.get(i).toString());
+                messages.add(message);
+            }
+        }
         return messages;
     }
 
