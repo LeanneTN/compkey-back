@@ -5,6 +5,7 @@ import com.example.compkeyback.util.*;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import com.huaban.analysis.jieba.*;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -202,6 +203,8 @@ public class CompkeyServiceImpl implements CompkeyService {
 
     @Override
     public String getStringValue(String statement) {
-        return ToAnalysis.parse(statement).toString();
+        // return ToAnalysis.parse(statement).toString();
+
+        return null;
     }
 }
