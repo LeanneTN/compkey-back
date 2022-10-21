@@ -202,9 +202,15 @@ public class CompkeyServiceImpl implements CompkeyService {
     }
 
     @Override
-    public String getStringValue(String statement) {
+    public List<String> getStringValue(String statement) {
         // return ToAnalysis.parse(statement).toString();
-
-        return null;
+        TfIdfAnalyzer tfIdfAnalyzer = new TfIdfAnalyzer();
+        int topN = 5;
+        List<Keyword> list = tfIdfAnalyzer.analyze(statement, topN);
+        List<String> keywords = new ArrayList<>();
+        for(Keyword keyword : list){
+            keywords.add(keyword.getName());
+        }
+        return keywords;
     }
 }

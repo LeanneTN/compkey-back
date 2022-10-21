@@ -7,5 +7,5 @@ import java.util.Map;
 public interface CompkeyService {
     public List<Map.Entry<String,Double>> compkey(String seedKey, int minNum) throws IOException;
 
-    public String getStringValue(String statement);
+    public List<String> getStringValue(String statement);
 }

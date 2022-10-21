@@ -31,7 +31,7 @@ public class MessageController {
     @PostMapping("/send")
     public List<Message> sendMessage(@RequestParam @NotNull(message = "statement can't be null") String statement) throws IOException {
         // 传入搜索语句statement，输出含有竞争关键词和竞争度的Message list
-        String stringValue = compkeyService.getStringValue(statement);
+        List<String> stringValue = compkeyService.getStringValue(statement);
 
         List<Message> messages = new ArrayList<>();
 
