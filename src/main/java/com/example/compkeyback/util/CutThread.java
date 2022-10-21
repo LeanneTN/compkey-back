@@ -11,7 +11,7 @@ import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
 
-public class CutTread {
+public class CutThread {
     public static class Thread_writeFile extends Thread{
 
         private String inFilename;

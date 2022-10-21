@@ -27,7 +27,7 @@ public class CompkeyServiceImpl implements CompkeyService {
         //方法一:单线程
         AnsjCutData.cut_clean("seedSearchResult.txt");
         //方法二:多线程
-//        cutThread.divide("seedSearchResult.txt",infoCounter);
+        //CutThread.divide("seedSearchResult.txt",infoCounter);
         //词频统计
         CountData.wordCount("cutted_seedSearchResult.txt",15);
         //确定中介关键词及相关搜索量
@@ -101,7 +101,7 @@ public class CompkeyServiceImpl implements CompkeyService {
             //单线程
             AnsjCutData.cut_clean(String.format("%sCompSearchResult.txt",midKey));
             //多线程
-            //CutTread.divide(String.format("%sCompSearchResult.txt",midKey),infCounter);
+            //CutThread.divide(String.format("%sCompSearchResult.txt",midKey),infCounter);
             //词频统计
             CountData.wordCount(String.format("cutted_%sCompSearchResult.txt",midKey),10);
 
