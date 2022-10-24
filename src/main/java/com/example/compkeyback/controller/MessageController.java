@@ -35,6 +35,9 @@ public class MessageController {
         // 传入搜索语句statement，输出含有竞争关键词和竞争度的Message list
         List<String> stringValue = compkeyService.getStringValue(statement);
 
+        //将前端传入的搜索记录存入数据库中
+        messageService.insertNewRecord(statement);
+
         List<Message> messages = new ArrayList<>();
 
         for(String keyword : stringValue){

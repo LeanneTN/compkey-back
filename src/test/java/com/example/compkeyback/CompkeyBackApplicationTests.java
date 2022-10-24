@@ -23,8 +23,8 @@ class CompkeyBackApplicationTests {
 
     @Test
     void contextLoads() throws IOException {
-//        messageService.insertSearchRecord();
-        compkeyService.compkey("图片",3);
+        messageService.insertNewRecord("你好");
+//        compkeyService.compkey("图片",3);
     }
 
 }
