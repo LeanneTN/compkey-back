@@ -14,4 +14,5 @@ public interface MessageService {
     public List<Index> selectSearchRecord(String keyword);
     public List<Message> getResultFromCache(String keyword);
     public void insertIntoCache(Message message, String seedWord);
+    public void insertNewRecord(String search);
 }

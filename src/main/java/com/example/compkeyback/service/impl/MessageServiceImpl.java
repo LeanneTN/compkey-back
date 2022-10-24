@@ -4,10 +4,12 @@ import ch.qos.logback.core.db.dialect.DBUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.compkeyback.domain.Index;
 import com.example.compkeyback.domain.Message;
+import com.example.compkeyback.domain.Record;
 import com.example.compkeyback.dto.Cache;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.persistence.CacheMapper;
 import com.example.compkeyback.persistence.IndexMapper;
+import com.example.compkeyback.persistence.RecordMapper;
 import com.example.compkeyback.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private CacheMapper cacheMapper;
+
+    @Autowired
+    private RecordMapper recordMapper;
 
     @Override
     public void insertSearchRecord() throws IOException {
@@ -125,5 +130,12 @@ public class MessageServiceImpl implements MessageService {
         cache.setCompWord(message.getKey());
         cache.setCompDegree(message.getValue());
         cacheMapper.insert(cache);
+    }
+
+    @Override
+    public void insertNewRecord(String search) {
+        Record record = new Record();
+        record.setRecord(search);
+        recordMapper.insert(record);
     }
 }
