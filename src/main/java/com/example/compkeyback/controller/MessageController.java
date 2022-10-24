@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/message")
@@ -30,13 +31,18 @@ public class MessageController {
     private CompkeyService compkeyService;
 
     @PostMapping("/send")
-    public List<Message> sendMessage(@RequestParam @NotNull(message = "statement can't be null") String statement) throws IOException {
+    public List<Message> sendMessage(@RequestParam @NotNull(message = "statement can't be null") String statement) throws IOException, ExecutionException, InterruptedException {
         // 传入搜索语句statement，输出含有竞争关键词和竞争度的Message list
         List<String> stringValue = compkeyService.getStringValue(statement);
 
         List<Message> messages = new ArrayList<>();
 
         for(String keyword : stringValue){
+            List<Message> messageList = messageService.getResultFromCache(keyword);
+            if(!messageList.isEmpty()){
+                messages.addAll(messageList);
+                continue;
+            }
             CompkeyResult tempList = compkeyService.compkey(keyword, 3);
             List<String> compkey = tempList.getCompkeyList();
             List<Double> compkeyResult = tempList.getCompkeyResult();
@@ -45,10 +51,9 @@ public class MessageController {
                 message.setKey(compkey.get(i));
                 message.setValue(compkeyResult.get(i).toString());
                 messages.add(message);
+                messageService.insertIntoCache(message, keyword);
             }
         }
         return messages;
     }
-
-
 }

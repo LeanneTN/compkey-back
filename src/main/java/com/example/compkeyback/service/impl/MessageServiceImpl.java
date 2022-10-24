@@ -3,6 +3,10 @@ package com.example.compkeyback.service.impl;
 import ch.qos.logback.core.db.dialect.DBUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.compkeyback.domain.Index;
+import com.example.compkeyback.domain.Message;
+import com.example.compkeyback.dto.Cache;
+import com.example.compkeyback.dto.CompkeyResult;
+import com.example.compkeyback.persistence.CacheMapper;
 import com.example.compkeyback.persistence.IndexMapper;
 import com.example.compkeyback.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private IndexMapper indexMapper;
+
+    @Autowired
+    private CacheMapper cacheMapper;
 
     @Override
     public void insertSearchRecord() throws IOException {
@@ -91,5 +98,32 @@ public class MessageServiceImpl implements MessageService {
         List<Index> indexList = new ArrayList<>();
         indexList = indexMapper.selectList(queryWrapper);
         return indexList;
+    }
+
+    @Override
+    public List<Message> getResultFromCache(String keyword) {
+        QueryWrapper<Cache> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seed_word", keyword);
+        List<Cache> cacheList = cacheMapper.selectList(queryWrapper);
+        if (cacheList.isEmpty()){
+            return null;
+        }
+        List<Message> messageList = new ArrayList<>();
+        for (Cache cache : cacheList){
+            Message message = new Message();
+            message.setKey(cache.getCompWord());
+            message.setValue(cache.getCompDegree());
+            messageList.add(message);
+        }
+        return messageList;
+    }
+
+    @Override
+    public void insertIntoCache(Message message, String seedWord) {
+        Cache cache = new Cache();
+        cache.setSeedWord(seedWord);
+        cache.setCompWord(message.getKey());
+        cache.setCompDegree(message.getValue());
+        cacheMapper.insert(cache);
     }
 }
