@@ -39,7 +39,7 @@ public class MessageController {
 
         for(String keyword : stringValue){
             List<Message> messageList = messageService.getResultFromCache(keyword);
-            if(!messageList.isEmpty()){
+            if(!(messageList == null)){
                 messages.addAll(messageList);
                 continue;
             }
