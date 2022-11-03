@@ -179,14 +179,25 @@ public class CompkeyServiceImpl implements CompkeyService {
         QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seed", seedWord).eq("comp_word", compWord);
         Score score1 = scoreMapper.selectOne(queryWrapper);
-        int frequency = score1.getFrequency();
-        frequency++;
-        double avg_score = ((double)5 / (frequency + 5)) * 3.5 + (frequency / (double)(frequency + 5)) * score;
-        score1.setAvgScore(avg_score);
-        score1.setFrequency(frequency);
-        UpdateWrapper<Score> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("seed", seedWord).eq("comp_word", compWord);
-        scoreMapper.update(score1, updateWrapper);
+        if(score1 == null){
+            Score temp = new Score();
+            int freq = 1;
+            temp.setFrequency(freq);
+            temp.setAvgScore(((double)5 / (freq + 5)) * 3.5 + (freq / (double)(freq + 5)) * score);
+            temp.setSeed(seedWord);
+            temp.setCompWord(compWord);
+            scoreMapper.insert(temp);
+        }
+        else {
+            int frequency = score1.getFrequency();
+            frequency++;
+            double avg_score = ((double) 5 / (frequency + 5)) * 3.5 + (frequency / (double) (frequency + 5)) * score;
+            score1.setAvgScore(avg_score);
+            score1.setFrequency(frequency);
+            UpdateWrapper<Score> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("seed", seedWord).eq("comp_word", compWord);
+            scoreMapper.update(score1, updateWrapper);
+        }
     }
 
     @Override
