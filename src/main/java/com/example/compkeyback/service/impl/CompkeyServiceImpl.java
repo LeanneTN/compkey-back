@@ -190,12 +190,22 @@ public class CompkeyServiceImpl implements CompkeyService {
     }
 
     @Override
-    public double getScoreByCompkey(ScoreDTO scoreDTO) {
+    public Score getScoreByCompkey(ScoreDTO scoreDTO) {
         String seedWord = scoreDTO.getSeedWord();
         String compKey = scoreDTO.getCompkeyWord();
         QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seed", seedWord).eq("comp_word", compKey);
         Score score = scoreMapper.selectOne(queryWrapper);
-        return score.getAvgScore();
+        return score;
+    }
+
+    @Override
+    public double compDegreeCompute() {
+        return 0;
+    }
+
+    @Override
+    public void searchEngine() {
+
     }
 }

@@ -1,5 +1,6 @@
 package com.example.compkeyback.service;
 
+import com.example.compkeyback.domain.Score;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
 
@@ -14,5 +15,9 @@ public interface CompkeyService {
 
     public void setScoreByCompkey(ScoreDTO scoreDTO);
 
-    public double getScoreByCompkey(ScoreDTO scoreDTO);
+    public Score getScoreByCompkey(ScoreDTO scoreDTO);
+
+    public double compDegreeCompute();
+
+    public void searchEngine();
 }

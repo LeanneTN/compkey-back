@@ -1,6 +1,7 @@
 package com.example.compkeyback.controller;
 
 import com.example.compkeyback.domain.Message;
+import com.example.compkeyback.domain.Score;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
 import com.example.compkeyback.service.CompkeyService;
@@ -55,11 +56,16 @@ public class MessageController {
                 Message message = new Message();
                 scoreDTO.setSeedWord(keyword);
                 scoreDTO.setCompkeyWord(compkey.get(i));
-                double score = compkeyService.getScoreByCompkey(scoreDTO) * 0.0001;
+                Score score = compkeyService.getScoreByCompkey(scoreDTO);
+                int frequency = score.getFrequency();
                 Double degree = compkeyResult.get(i);
-                degree = (degree + score) / (degree - score);
+//                degree = (degree + score) / (degree - score);
+                // degree 计算函数
+
+
                 message.setKey(compkey.get(i));
                 message.setValue(degree.toString());
+                message.setSeedWord(keyword);
                 messages.add(message);
                 messageService.insertIntoCache(message, keyword);
             }
