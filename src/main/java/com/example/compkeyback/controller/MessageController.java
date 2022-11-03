@@ -2,6 +2,7 @@ package com.example.compkeyback.controller;
 
 import com.example.compkeyback.domain.Message;
 import com.example.compkeyback.dto.CompkeyResult;
+import com.example.compkeyback.dto.ScoreDTO;
 import com.example.compkeyback.service.CompkeyService;
 import com.example.compkeyback.service.MessageService;
 import javax.validation.constraints.NotNull;
@@ -49,14 +50,35 @@ public class MessageController {
             CompkeyResult tempList = compkeyService.compkey(keyword, 3);
             List<String> compkey = tempList.getCompkeyList();
             List<Double> compkeyResult = tempList.getCompkeyResult();
+            ScoreDTO scoreDTO = new ScoreDTO();
             for(int i = 0; i < compkey.size(); i++){
                 Message message = new Message();
+                scoreDTO.setSeedWord(keyword);
+                scoreDTO.setCompkeyWord(compkey.get(i));
+                double score = compkeyService.getScoreByCompkey(scoreDTO) * 0.0001;
+                Double degree = compkeyResult.get(i);
+                degree = (degree + score) / (degree - score);
                 message.setKey(compkey.get(i));
-                message.setValue(compkeyResult.get(i).toString());
+                message.setValue(degree.toString());
                 messages.add(message);
                 messageService.insertIntoCache(message, keyword);
             }
         }
         return messages;
+    }
+
+    @PostMapping("/score")
+    public void setScore(
+            @RequestParam String seed,
+            @RequestParam String compkey,
+            @RequestParam int score,
+            @RequestParam double compDegree
+    ){
+        ScoreDTO scoreDTO = new ScoreDTO();
+        scoreDTO.setScore(score);
+        scoreDTO.setCompDegree(compDegree);
+        scoreDTO.setSeedWord(seed);
+        scoreDTO.setCompkeyWord(compkey);
+        compkeyService.setScoreByCompkey(scoreDTO);
     }
 }
