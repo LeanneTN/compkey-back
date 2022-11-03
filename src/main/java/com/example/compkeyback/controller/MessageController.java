@@ -45,6 +45,9 @@ public class MessageController {
         for(String keyword : stringValue){
             List<Message> messageList = messageService.getResultFromCache(keyword);
             if(!(messageList == null)){
+                for(Message message : messageList){
+                    message.setSeedWord(keyword);
+                }
                 messages.addAll(messageList);
                 continue;
             }
