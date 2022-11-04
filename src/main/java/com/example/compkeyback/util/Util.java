@@ -152,4 +152,10 @@ public class Util {
         String filePath = root+File.separator+subPath+FileName;
         return filePath;
     }
+
+    public static double sigmoid(int value){
+        double ey = Math.pow(Math.E,-value);
+        double result = 1/(1+ey);
+        return result;
+    }
 }

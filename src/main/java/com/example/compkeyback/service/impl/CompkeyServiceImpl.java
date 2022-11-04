@@ -2,7 +2,6 @@ package com.example.compkeyback.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.injector.methods.Update;
 import com.example.compkeyback.domain.Score;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
@@ -200,8 +199,11 @@ public class CompkeyServiceImpl implements CompkeyService {
     }
 
     @Override
-    public double compDegreeCompute() {
-        return 0;
+    public double compDegreeCompute(float commark, int score, int frequency) {
+        double reScore = commark / 5.0;//将0-5的评分转化为0-1
+        double alpha = Util.sigmoid(frequency);
+        double finalScore = reScore*alpha + score*(1-alpha);
+        return finalScore;
     }
 
     @Override
