@@ -1,13 +1,15 @@
 package com.example.compkeyback.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.compkeyback.domain.Score;
+import com.example.compkeyback.dto.Cache;
 import com.example.compkeyback.dto.CompkeyResult;
-import com.example.compkeyback.dto.ScoreDTO;
+import com.example.compkeyback.persistence.CacheMapper;
 import com.example.compkeyback.persistence.ScoreMapper;
-import com.example.compkeyback.service.CompkeyService;
-import com.example.compkeyback.util.*;
+import com.example.compkeyback.service.DyUpdateService;
+import com.example.compkeyback.util.CompKeyThread;
+import com.example.compkeyback.util.MidKeyThread;
+import com.example.compkeyback.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -17,11 +19,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-@Service("compkeyService")
+@Service("dyUpdateService")
 @Component
-public class CompkeyServiceImpl implements CompkeyService {
+public class DyUpdateServiceImpl implements DyUpdateService {
     @Autowired
     private ScoreMapper scoreMapper;
+    @Autowired
+    private CacheMapper cacheMapper;
 
     @Override
     public CompkeyResult compkey(String seedKey, int midNum) throws IOException, ExecutionException, InterruptedException {
@@ -154,57 +158,14 @@ public class CompkeyServiceImpl implements CompkeyService {
         compkeyResult.setCompkeyList(compkey);
         compkeyResult.setCompkeyResult(compvalue);
 
+        System.out.println(compkeyResult);
         return compkeyResult;
     }
 
     @Override
-    public List<String> getStringValue(String statement) {
-        // return ToAnalysis.parse(statement).toString();
-        TfIdfAnalyzer tfIdfAnalyzer = new TfIdfAnalyzer();
-        int topN = 5;
-        List<Keyword> list = tfIdfAnalyzer.analyze(statement, topN);
-        List<String> keywords = new ArrayList<>();
-        for(Keyword keyword : list){
-            keywords.add(keyword.getName());
-        }
-        return keywords;
-    }
-
-    @Override
-    public void setScoreByCompkey(ScoreDTO scoreDTO) {
-        String compWord = scoreDTO.getCompkeyWord();
-        String seedWord = scoreDTO.getSeedWord();
-        int score = scoreDTO.getScore();
+    public Score getScoreByCompkey(String seedWord,String compWord) {
         QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seed", seedWord).eq("comp_word", compWord);
-        Score score1 = scoreMapper.selectOne(queryWrapper);
-        if(score1 == null){
-            Score temp = new Score();
-            int freq = 1;
-            temp.setFrequency(freq);
-            temp.setAvgScore(((double)5 / (freq + 5)) * 3.5 + (freq / (double)(freq + 5)) * score);
-            temp.setSeed(seedWord);
-            temp.setCompWord(compWord);
-            scoreMapper.insert(temp);
-        }
-        else {
-            int frequency = score1.getFrequency();
-            frequency++;
-            double avg_score = ((double) 5 / (frequency + 5)) * 3.5 + (frequency / (double) (frequency + 5)) * score;
-            score1.setAvgScore(avg_score);
-            score1.setFrequency(frequency);
-            UpdateWrapper<Score> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("seed", seedWord).eq("comp_word", compWord);
-            scoreMapper.update(score1, updateWrapper);
-        }
-    }
-
-    @Override
-    public Score getScoreByCompkey(ScoreDTO scoreDTO) {
-        String seedWord = scoreDTO.getSeedWord();
-        String compKey = scoreDTO.getCompkeyWord();
-        QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("seed", seedWord).eq("comp_word", compKey);
         Score score = scoreMapper.selectOne(queryWrapper);
         return score;
     }
@@ -220,8 +181,137 @@ public class CompkeyServiceImpl implements CompkeyService {
     }
 
     @Override
-    public void searchEngine() {
-        //留了一个使用别的搜索引擎内核的接口
+    public void updateDB(String seed,HashMap<String,Double>newHash,List<String>deleteList){
+        //删除操作
+        for (int i=0;i<deleteList.size();i++){
+            String compWord = deleteList.get(i);
+            QueryWrapper<Cache> cacheQueryWrapper = new QueryWrapper<>();
+            QueryWrapper<Score> scoreQueryWrapper = new QueryWrapper<>();
+            cacheQueryWrapper.eq("seed_word",seed).eq("comp_word",compWord);
+            scoreQueryWrapper.eq("seed", seed).eq("comp_word", compWord);
+            cacheMapper.delete(cacheQueryWrapper);
+            scoreMapper.delete(scoreQueryWrapper);
+        }
+        //添加操作
+        System.out.println(newHash);
+        for (HashMap.Entry<String, Double> entry : newHash.entrySet()){
+            String compWord = entry.getKey();
+            Double compDegree = entry.getValue();
+            Cache cache = new Cache();
+            cache.setSeedWord(seed);
+            cache.setCompWord(compWord);
+            cache.setCompDegree(compDegree.toString());
+            cacheMapper.insert(cache);
+        }
     }
 
+    @Override
+    public void dyUpdate() throws IOException, ExecutionException, InterruptedException {
+        //定义种子及其竞争词的map
+        Map<String,HashMap<String,Double>> seedCompPair = new HashMap<>();
+        QueryWrapper<Cache> cacheQueryWrapper = new QueryWrapper<>();
+        List<Cache> cacheList = cacheMapper.selectList(cacheQueryWrapper);
+        System.out.println(cacheList);
+        HashMap<String,Double> compHash = new HashMap<>();
+        for (int i = 0;i<cacheList.size();i++){
+            //获取当下的种子词
+            String seedWord = cacheList.get(i).getSeedWord();
+            //判断读取的数据是否是新的种子
+            Set<String> keySet = seedCompPair.keySet();
+            for(String key : keySet){
+                if(key.equals(seedWord)==false){
+                    compHash = new HashMap<>();
+                }
+            }
+            compHash.put(cacheList.get(i).getCompWord(),new Double(cacheList.get(i).getCompDegree()));
+            seedCompPair.put(seedWord,compHash);
+        }
+        System.out.println(seedCompPair);
+
+        //检查用户评价后的竞争词情况
+        for (HashMap.Entry<String, HashMap<String,Double>> entry : seedCompPair.entrySet()) {
+            String seedWord = entry.getKey();
+            HashMap<String,Double> compDegreePair = entry.getValue();
+            //定义该种子关键词下需要保留或删去的词对
+            List<String> savePair = new ArrayList<>();
+            List<String> deletePair = new ArrayList<>();
+            //遍历某个种子的所有竞争词及竞争度
+            for (Map.Entry<String,Double> entry1 : compDegreePair.entrySet()){
+                String compWord = entry1.getKey();
+                Double compDegree = entry1.getValue();
+                Score score = getScoreByCompkey(seedWord,compWord);
+                //当该竞争词未被用户评价时，也选择保留
+                if(score==null){
+                    savePair.add(compWord);
+                    continue;
+                }
+                Double resultcomp = compDegreeCompute(score.getAvgScore(),compDegree,score.getFrequency());
+                System.out.println(resultcomp);
+                System.out.println(compDegree);
+                //根据用户评价调整后的分数小于原本竞争度时选择删去
+                if(resultcomp<compDegree){
+                    deletePair.add(compWord);
+                }else {
+                    savePair.add(compWord);
+                }
+            }
+            System.out.println(deletePair);
+            System.out.println(savePair);
+
+            //更新数据库
+            if(deletePair.size()>0){
+                HashMap<String,Double> newHash = new HashMap<>();
+                int num = deletePair.size();
+                CompkeyResult compkeyResult = compkey(seedWord,10);
+                List<String> compWordList = compkeyResult.getCompkeyList();
+                List<Double> compDegreeList = compkeyResult.getCompkeyResult();
+
+                //测试用
+//                List<String> compWordList = new ArrayList<>();
+//                List<Double> compDegreeList = new ArrayList<>();
+//                compWordList.add("2016");
+//                compWordList.add("歌声");
+//                compWordList.add("地图");
+//                compWordList.add("声音");
+//                compWordList.add("关系");
+//                compWordList.add("奥运会");
+//                compWordList.add("排名");
+//                compWordList.add("官网");
+//                compWordList.add("图片");
+//                compDegreeList.add(0.0017339270396945984);
+//                compDegreeList.add(0.0011674873848215093);
+//                compDegreeList.add(6.233219205204096E-4);
+//                compDegreeList.add(7.381670849840344E-4);
+//                compDegreeList.add(5.644518990469606E-4);
+//                compDegreeList.add(4.196874514141602E-4);
+//                compDegreeList.add(4.184799835825972E-4);
+//                compDegreeList.add(3.236564648079307E-4);
+//                compDegreeList.add(2.060672383316094E-4);
+
+                for(int j=0;j<compWordList.size()&&num>0;j++){
+                    String compWord = compWordList.get(j);
+                    boolean flag = true;
+                    for(int i=0;i<savePair.size();i++){
+                        if(compWord.equals(savePair.get(i))){
+                            flag = false;
+                            break;
+                        }
+                    }
+                    for(int i=0;i<deletePair.size();i++){
+                        if(compWord.equals(deletePair.get(i))){
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        newHash.put(compWord,compDegreeList.get(j));
+                        num--;
+                    }
+                }
+
+                updateDB(seedWord,newHash,deletePair);
+            }
+
+        }
+    }
 }
