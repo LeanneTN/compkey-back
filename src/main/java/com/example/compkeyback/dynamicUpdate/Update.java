@@ -219,13 +219,15 @@ public class Update {
     }
 
     public static double compDegreeCompute(double commark, double degree, int frequency) {
-        double reScore = commark / 5.0;//将0-5的评分转化为0-1
+        //double reScore = commark / 5.0;//将0-5的评分转化为0-1
+        double scale = 5.0/ (degree*2);
+        double reScore = commark/scale;
         double alpha = Util.mysigmoid(frequency,0.0001);
         double finalScore = reScore * alpha + degree * (1 - alpha);
         return finalScore;
     }
     public static void main(String[] args){
-        System.out.println(compDegreeCompute(3.5,0.001,400));
+        System.out.println(compDegreeCompute(2,0.005,400));
     }
 }
 
