@@ -153,9 +153,14 @@ public class Util {
         return filePath;
     }
 
-    public static double sigmoid(int value){
-        double ey = Math.pow(Math.E,-value);
-        double result = 1/(1+ey);
-        return result;
+//    public static double sigmoid(int value){
+//        double ey = Math.pow(Math.E,-value);
+//        double result = 1/(1+ey);
+//        return result;
+    //值域是ok的，但是定义域不对劲
+//    }
+
+    public static double mysigmoid(int value,double beta){
+        return 1.0-1.0/(value*beta+1);
     }
 }

@@ -210,15 +210,16 @@ public class CompkeyServiceImpl implements CompkeyService {
     }
 
     @Override
-    public double compDegreeCompute(float commark, float degree, int frequency) {
+    public double compDegreeCompute(double commark, double degree, int frequency) {
         double reScore = commark / 5.0;//将0-5的评分转化为0-1
-        double alpha = Util.sigmoid(frequency);
+        double alpha = Util.mysigmoid(frequency,0.001);
         double finalScore = reScore*alpha + degree*(1-alpha);
         return finalScore;
     }
 
     @Override
     public void searchEngine() {
-
+        //留了一个使用别的搜索引擎内核的接口
     }
+
 }

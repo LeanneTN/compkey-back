@@ -17,7 +17,7 @@ public interface CompkeyService {
 
     public Score getScoreByCompkey(ScoreDTO scoreDTO);
 
-    public double compDegreeCompute(float commark, float degree, int frequency);
+    public double compDegreeCompute(double commark, double degree, int frequency);
 
     public void searchEngine();
 }
