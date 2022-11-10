@@ -1,29 +1,30 @@
-package com.example.compkeyback.service.impl;
+package com.example.compkeyback.dynamicUpdate;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.compkeyback.domain.Score;
+import com.example.compkeyback.dto.Cache;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
+import com.example.compkeyback.persistence.CacheMapper;
 import com.example.compkeyback.persistence.ScoreMapper;
 import com.example.compkeyback.service.CompkeyService;
 import com.example.compkeyback.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-@Service("compkeyService")
-@Component
-public class CompkeyServiceImpl implements CompkeyService {
+
+public class Update {
     @Autowired
     private ScoreMapper scoreMapper;
+    @Autowired
+    private CacheMapper cacheMapper;
 
-    @Override
+
     public CompkeyResult compkey(String seedKey, int midNum) throws IOException, ExecutionException, InterruptedException {
         System.out.println("查询种子关键词的相关搜索记录...");
         //从清洗过的数据中提取出与种子关键字相关的搜索信息并保存
@@ -154,71 +155,78 @@ public class CompkeyServiceImpl implements CompkeyService {
         compkeyResult.setCompkeyList(compkey);
         compkeyResult.setCompkeyResult(compvalue);
 
+        System.out.println(compkeyResult);
         return compkeyResult;
     }
 
-    @Override
-    public List<String> getStringValue(String statement) {
-        // return ToAnalysis.parse(statement).toString();
-        TfIdfAnalyzer tfIdfAnalyzer = new TfIdfAnalyzer();
-        int topN = 5;
-        List<Keyword> list = tfIdfAnalyzer.analyze(statement, topN);
-        List<String> keywords = new ArrayList<>();
-        for(Keyword keyword : list){
-            keywords.add(keyword.getName());
+    public void dyUpdate(){
+        //定义种子及其竞争词的map
+        Map<String,HashMap<String,Double>> seedCompPair = new HashMap<>();
+        QueryWrapper cacheQueryWrapper = new QueryWrapper();
+        QueryWrapper scoreQueryWrapper = new QueryWrapper();
+        List<Cache> cacheList = cacheMapper.selectList(cacheQueryWrapper);
+        List<Score> scoreList = scoreMapper.selectList(scoreQueryWrapper);
+        HashMap<String,Double> compHash = new HashMap<>();
+        for (int i = 0;i<cacheList.size();i++){
+            //获取当下的种子词
+            String seedWord = cacheList.get(i).getSeedWord();
+            //判断读取的数据是否是新的种子
+            Set<String> keySet = seedCompPair.keySet();
+            for(String key : keySet){
+                if(key.equals(seedWord)){
+                    compHash = new HashMap<>();
+                }
+            }
+            compHash.put(cacheList.get(i).getCompWord(),new Double(cacheList.get(i).getCompDegree()));
+            seedCompPair.put(seedWord,compHash);
         }
-        return keywords;
+
+        //检查用户评价后的竞争词情况
+        for (HashMap.Entry<String, HashMap<String,Double>> entry : seedCompPair.entrySet()) {
+            String seedWord = entry.getKey();
+            HashMap<String,Double> compDegreePair = entry.getValue();
+            //定义该种子关键词下需要保留或删去的词对
+            List<String> savePair = new ArrayList<>();
+            List<String> deletePair = new ArrayList<>();
+            //遍历某个种子的所有竞争词及竞争度
+            for (Map.Entry<String,Double> entry1 : compDegreePair.entrySet()){
+                String compWord = entry1.getKey();
+                Double compDegree = entry1.getValue();
+                Score score = getScoreByCompkey(seedWord,compWord);
+                Double resultcomp = compDegreeCompute(score.getAvgScore(),);
+                //根据用户评价调整后的分数小于原本竞争度时选择删去
+                if(resultcomp<compDegree){
+                    deletePair.add(compWord);
+                }else {
+                    savePair.add(compWord);
+                }
+            }
+
+        }
+
+
+
     }
 
-    @Override
-    public void setScoreByCompkey(ScoreDTO scoreDTO) {
-        String compWord = scoreDTO.getCompkeyWord();
-        String seedWord = scoreDTO.getSeedWord();
-        int score = scoreDTO.getScore();
+    public Score getScoreByCompkey(String seedWord,String compWord) {
         QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seed", seedWord).eq("comp_word", compWord);
-        Score score1 = scoreMapper.selectOne(queryWrapper);
-        if(score1 == null){
-            Score temp = new Score();
-            int freq = 1;
-            temp.setFrequency(freq);
-            temp.setAvgScore(((double)5 / (freq + 5)) * 3.5 + (freq / (double)(freq + 5)) * score);
-            temp.setSeed(seedWord);
-            temp.setCompWord(compWord);
-            scoreMapper.insert(temp);
-        }
-        else {
-            int frequency = score1.getFrequency();
-            frequency++;
-            double avg_score = ((double) 5 / (frequency + 5)) * 3.5 + (frequency / (double) (frequency + 5)) * score;
-            score1.setAvgScore(avg_score);
-            score1.setFrequency(frequency);
-            UpdateWrapper<Score> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("seed", seedWord).eq("comp_word", compWord);
-            scoreMapper.update(score1, updateWrapper);
-        }
-    }
-
-    @Override
-    public Score getScoreByCompkey(ScoreDTO scoreDTO) {
-        String seedWord = scoreDTO.getSeedWord();
-        String compKey = scoreDTO.getCompkeyWord();
-        QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("seed", seedWord).eq("comp_word", compKey);
         Score score = scoreMapper.selectOne(queryWrapper);
         return score;
     }
 
-    @Override
-    public double compDegreeCompute(float commark, float degree, int frequency) {
+    public double compDegreeCompute(float commark, double degree, int frequency) {
         double reScore = commark / 5.0;//将0-5的评分转化为0-1
         double alpha = Util.sigmoid(frequency);
         double finalScore = reScore*alpha + degree*(1-alpha);
         return finalScore;
     }
 
-    @Override
-    public void searchEngine() {
 
+
+
+    public static void main(String[] args){
+
+        CompkeyResult compkeyResult = compkey()
     }
 }
