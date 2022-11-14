@@ -2,6 +2,7 @@ package com.example.compkeyback.controller;
 
 import com.example.compkeyback.domain.Message;
 import com.example.compkeyback.domain.Score;
+import com.example.compkeyback.dto.CompList;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
 import com.example.compkeyback.service.CompkeyService;
@@ -9,6 +10,7 @@ import com.example.compkeyback.service.MessageService;
 import javax.validation.constraints.NotNull;
 
 import com.example.compkeyback.service.impl.CompkeyServiceImpl;
+import com.example.compkeyback.util.Util;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,6 +49,19 @@ public class MessageController {
             if(!(messageList == null)){
                 for(Message message : messageList){
                     message.setSeedWord(keyword);
+                    ScoreDTO scoreDTO = new ScoreDTO();
+                    scoreDTO.setSeedWord(keyword);
+                    scoreDTO.setCompkeyWord(message.getKey());
+                    Score score = compkeyService.getScoreByCompkey(scoreDTO);
+                    if(score!=null){
+                        int frequency = score.getFrequency();
+                        double avgScore = score.getAvgScore();
+                        Double degree = Double.parseDouble(message.getValue());
+                        //返回动态结果
+                        Double resultcomp = compkeyService.compDegreeCompute(avgScore,degree,frequency);
+                        //用于显示的message的竞争度为动态竞争度resultcomp
+                        message.setValue(resultcomp.toString());
+                    }
                 }
                 messages.addAll(messageList);
                 continue;
@@ -61,18 +76,21 @@ public class MessageController {
                 scoreDTO.setCompkeyWord(compkey.get(i));
                 Score score = compkeyService.getScoreByCompkey(scoreDTO);
                 int frequency = score.getFrequency();
+                double avgScore = score.getAvgScore();
                 Double degree = compkeyResult.get(i);
-//                degree = (degree + score) / (degree - score);
-                // degree 计算函数
-
-
+                //返回动态结果
+                Double resultcomp = compkeyService.compDegreeCompute(avgScore,degree,frequency);
                 message.setKey(compkey.get(i));
                 message.setValue(degree.toString());
                 message.setSeedWord(keyword);
-                messages.add(message);
+                //插入缓存数据库的message的竞争度为compkey算法的结果值
                 messageService.insertIntoCache(message, keyword);
+                //用于显示的message的竞争度为动态竞争度resultcomp
+                message.setValue(resultcomp.toString());
+                messages.add(message);
             }
         }
+        System.out.println(messages);
         return messages;
     }
 
@@ -90,4 +108,17 @@ public class MessageController {
         scoreDTO.setCompkeyWord(compkey);
         compkeyService.setScoreByCompkey(scoreDTO);
     }
+
+    @PostMapping("/mylist")
+    public void getListInfo(@RequestParam String seedWords,
+                            @RequestParam String compWords,
+                            @RequestParam double comp){
+        CompList compList = new CompList();
+        compList.setCompWord(compWords);
+        compList.setSeedWord(seedWords);
+        compList.setComp(comp);
+        System.out.println(compList);
+        compkeyService.getListInfo(compList);
+    }
+
 }

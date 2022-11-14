@@ -3,6 +3,7 @@ package com.example.compkeyback.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.compkeyback.domain.Score;
+import com.example.compkeyback.dto.CompList;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
 import com.example.compkeyback.persistence.ScoreMapper;
@@ -222,6 +223,34 @@ public class CompkeyServiceImpl implements CompkeyService {
     @Override
     public void searchEngine() {
         //留了一个使用别的搜索引擎内核的接口
+    }
+
+    @Override
+    public void getListInfo(CompList compList) {
+        String seed = compList.getSeedWord();
+        String compWord = compList.getCompWord();
+        QueryWrapper<Score> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seed",seed).eq("comp_word",compWord);
+        Score score = scoreMapper.selectOne(queryWrapper);
+        if(score==null){
+            int freq = 1;
+            double equalScore = 3.7;//对于点击的情况,默认用户评分为3.7
+            score.setFrequency(freq);
+            score.setAvgScore(((double)5 / (freq + 5)) * 3.5 + (freq / (double)(freq + 5)) * equalScore);
+            score.setSeed(seed);
+            score.setCompWord(compWord);
+            scoreMapper.insert(score);
+        }else {
+            int frequency = score.getFrequency();
+            frequency++;
+            double equalScore = score.getAvgScore()+0.2;//对于点击的情况,相当于在评分基础上+0.2
+            double avg_score = ((double) 5 / (frequency + 5)) * 3.5 + (frequency / (double) (frequency + 5)) * equalScore;
+            score.setAvgScore(avg_score);
+            score.setFrequency(frequency);
+            UpdateWrapper<Score> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("seed", seed).eq("comp_word", compWord);
+            scoreMapper.update(score, updateWrapper);
+        }
     }
 
 }
