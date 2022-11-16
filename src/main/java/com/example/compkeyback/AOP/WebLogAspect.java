@@ -14,6 +14,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 
+/**
+ * 用户的每一个都可以有记录
+ */
 @Aspect
 @Component
 public class WebLogAspect {
@@ -102,7 +105,7 @@ public class WebLogAspect {
     }
 
     /**
-     * @Description: 获取ip，通过这个来确认用户的身份
+     * @Description: 获取ip，通过这个来确认用户的身份 考虑是否是异常用户
      */
     public String getIpAddr(HttpServletRequest request) {
         String ipAddress = null;
