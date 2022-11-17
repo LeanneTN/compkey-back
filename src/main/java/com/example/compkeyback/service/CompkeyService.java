@@ -1,6 +1,7 @@
 package com.example.compkeyback.service;
 
 import com.example.compkeyback.domain.Score;
+import com.example.compkeyback.dto.CompList;
 import com.example.compkeyback.dto.CompkeyResult;
 import com.example.compkeyback.dto.ScoreDTO;
 
@@ -20,4 +21,6 @@ public interface CompkeyService {
     public double compDegreeCompute(double commark, double degree, int frequency);
 
     public void searchEngine();
+
+    public void getListInfo(CompList compList);
 }
