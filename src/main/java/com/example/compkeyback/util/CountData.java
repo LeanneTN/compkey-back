@@ -64,7 +64,7 @@ public class CountData {
         }
         //存储到txt中
         System.out.println("============统计结果============");
-        int number = (list.size()<num? list.size() : num);
+        int number = (Math.min(list.size(), num));
         if(list.size()!=0){
             for (int i=0;i<number;i++){
                 bw.append(list.get(i).toString());
