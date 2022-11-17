@@ -215,7 +215,7 @@ public class CompkeyServiceImpl implements CompkeyService {
         //double reScore = commark / 5.0;//将0-5的评分转化为0-1
         double scale = 5.0/ (degree*2);
         double reScore = commark/scale;
-        double alpha = Util.mysigmoid(frequency,0.0001);
+        double alpha = Util.mysigmoid(frequency,0.001);
         double finalScore = reScore * alpha + degree * (1 - alpha);
         return finalScore;
     }
