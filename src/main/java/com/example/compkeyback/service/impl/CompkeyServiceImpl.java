@@ -76,7 +76,7 @@ public class CompkeyServiceImpl implements CompkeyService {
         System.out.println("开始计算竞争度...");
         //确定相关搜索量
         //种子搜索量
-        if (midCountMap==null){ //增加空指针判断
+        if (!midCountMap.containsKey(seedKey)){ //增加空指针判断
             CompkeyResult compkeyResult = new CompkeyResult();
             return compkeyResult;
         }
