@@ -71,7 +71,7 @@ public class MessageController {
             List<Double> compkeyResult = tempList.getCompkeyResult();
             ScoreDTO scoreDTO = new ScoreDTO();
             //空指针判断
-            if (compkey.isEmpty()){
+            if(compkey.get(0).equals("无")){
                 return messages;
             }
             for(int i = 0; i < compkey.size(); i++){

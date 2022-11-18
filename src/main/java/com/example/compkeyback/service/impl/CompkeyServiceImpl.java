@@ -79,6 +79,12 @@ public class CompkeyServiceImpl implements CompkeyService {
         System.out.println(midCountMap);
         if (!midCountMap.containsKey(seedKey)){ //增加空指针判断
             CompkeyResult compkeyResult = new CompkeyResult();
+            List<String> compkey = new ArrayList<>();
+            List<Double> compvalue = new ArrayList<>();
+            compkey.add("无");
+            compvalue.add((double) -1);
+            compkeyResult.setCompkeyList(compkey);
+            compkeyResult.setCompkeyResult(compvalue);
             return compkeyResult;
         }
         int s = midCountMap.get(seedKey);
