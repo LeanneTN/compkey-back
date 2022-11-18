@@ -70,6 +70,10 @@ public class MessageController {
             List<String> compkey = tempList.getCompkeyList();
             List<Double> compkeyResult = tempList.getCompkeyResult();
             ScoreDTO scoreDTO = new ScoreDTO();
+            //空指针判断
+            if (compkey.isEmpty()){
+                return messages;
+            }
             for(int i = 0; i < compkey.size(); i++){
                 Message message = new Message();
                 scoreDTO.setSeedWord(keyword);
